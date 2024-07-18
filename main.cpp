@@ -1,5 +1,7 @@
 #include <cmath>
 #include <ctime>
+#include <sstream>
+#include <string>
 
 #include <SFML/Graphics.hpp>
 
@@ -122,6 +124,8 @@ int main()
     float freq = 1.f;
     float amp = 1.f;
 
+    std::stringstream titleBuilder;
+
     sf::Texture noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
     sf::Sprite noiseSprite;
 
@@ -187,6 +191,9 @@ int main()
         {
             noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
             noiseSprite.setTexture(noiseTexture);
+            titleBuilder << "Noise [O = " << oct << ", F = " << freq << ", A = " << amp << "]";
+            window.setTitle(titleBuilder.str());
+            titleBuilder.str(std::string());
             updated = false;
         }
 
