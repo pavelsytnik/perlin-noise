@@ -127,6 +127,8 @@ int main()
 
     noiseSprite.setTexture(noiseTexture);
 
+    bool updated = true;
+
     while (window.isOpen())
     {
         sf::Event event;
@@ -143,47 +145,49 @@ int main()
                 {
                     case sf::Keyboard::Scan::R:
                         g_seed = std::time(nullptr);
-                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
-                        noiseSprite.setTexture(noiseTexture);
+                        updated = true;
                         break;
 
                     case sf::Keyboard::Scan::Up:
                         amp += 0.02f;
-                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
-                        noiseSprite.setTexture(noiseTexture);
+                        updated = true;
                         break;
 
                     case sf::Keyboard::Scan::Down:
                         amp -= 0.02f;
-                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
-                        noiseSprite.setTexture(noiseTexture);
+                        updated = true;
                         break;
 
                     case sf::Keyboard::Scan::Right:
                         freq += 0.02f;
-                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
-                        noiseSprite.setTexture(noiseTexture);
+                        updated = true;
                         break;
                     
                     case sf::Keyboard::Scan::Left:
                         freq -= 0.02f;
-                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
-                        noiseSprite.setTexture(noiseTexture);
+                        updated = true;
                         break;
+
                     case sf::Keyboard::Scan::Equal:
                         oct += 1;
-                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
-                        noiseSprite.setTexture(noiseTexture);
+                        updated = true;
                         break;
+
                     case sf::Keyboard::Scan::Hyphen:
                         oct -= 1;
-                        if (oct == 0) { oct = 1; break; }
-                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
-                        noiseSprite.setTexture(noiseTexture);
+                        if (oct == 0) oct = 1;
+                        else updated = true;
                         break;                                            
                 }
                 break;
             }
+        }
+
+        if (updated)
+        {
+            noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
+            noiseSprite.setTexture(noiseTexture);
+            updated = false;
         }
 
         window.clear();
