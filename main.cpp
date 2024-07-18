@@ -68,7 +68,7 @@ float perlin(float x, float y)
     return value;
 }
 
-sf::Texture getNoise(int width, int height)
+sf::Texture getNoise(int width, int height, float frequency, float amplitude)
 {
     sf::Uint8* pixels = new sf::Uint8[width * height * 4];
 
@@ -81,8 +81,8 @@ sf::Texture getNoise(int width, int height)
             int index = (y * width + x) * 4;
 
             float val = 0;
-            float amp = 1;
-            float freq = 1;
+            float amp = amplitude;
+            float freq = frequency;
 
             for (int i = 0; i < 12; ++i)
             {
@@ -151,13 +151,16 @@ int main()
     //     }
     // }
 
-    sf::Texture noiseTexture = getNoise(winSize.x, winSize.y);
+    sf::Texture noiseTexture = getNoise(winSize.x, winSize.y, 1, 1);
     sf::Sprite noiseSprite;
 
     //noiseTexture.create(winSize.x, winSize.y);
     //noiseTexture.update(pixels);
 
     noiseSprite.setTexture(noiseTexture);
+
+    float freq = 1.f;
+    float amp = 1.f;
 
     while (window.isOpen())
     {
@@ -173,7 +176,31 @@ int main()
                 if (event.key.scancode == sf::Keyboard::R)
                 {
                     g_seed = std::time(nullptr);
-                    noiseTexture = getNoise(winSize.x, winSize.y);
+                    noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                    noiseSprite.setTexture(noiseTexture);
+                }
+                else if (event.key.scancode == sf::Keyboard::Scan::Up)
+                {
+                    amp += 0.02f;
+                    noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                    noiseSprite.setTexture(noiseTexture);
+                }
+                else if (event.key.scancode == sf::Keyboard::Scan::Down)
+                {
+                    amp -= 0.02f;
+                    noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                    noiseSprite.setTexture(noiseTexture);
+                }
+                else if (event.key.scancode == sf::Keyboard::Scan::Right)
+                {
+                    freq += 0.02f;
+                    noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                    noiseSprite.setTexture(noiseTexture);
+                }
+                else if (event.key.scancode == sf::Keyboard::Scan::Left)
+                {
+                    freq -= 0.02f;
+                    noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
                     noiseSprite.setTexture(noiseTexture);
                 }
             }
