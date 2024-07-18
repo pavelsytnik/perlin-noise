@@ -68,7 +68,7 @@ float perlin(float x, float y)
     return value;
 }
 
-sf::Texture getNoise(int width, int height, float frequency, float amplitude)
+sf::Texture getNoise(int width, int height, float frequency, float amplitude, int octaves = 12)
 {
     sf::Uint8* pixels = new sf::Uint8[width * height * 4];
 
@@ -84,7 +84,7 @@ sf::Texture getNoise(int width, int height, float frequency, float amplitude)
             float amp = amplitude;
             float freq = frequency;
 
-            for (int i = 0; i < 12; ++i)
+            for (int i = 0; i < octaves; ++i)
             {
                 val += perlin(x * freq / GRID_SIZE, y * freq / GRID_SIZE) * amp;
 
@@ -118,6 +118,7 @@ int main()
     sf::RenderWindow window(sf::VideoMode(1000, 1000, 32), "Noise");
     sf::Vector2u winSize = window.getSize();
 
+    int oct = 12;
     float freq = 1.f;
     float amp = 1.f;
 
@@ -142,33 +143,44 @@ int main()
                 {
                     case sf::Keyboard::Scan::R:
                         g_seed = std::time(nullptr);
-                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
                         noiseSprite.setTexture(noiseTexture);
                         break;
 
                     case sf::Keyboard::Scan::Up:
                         amp += 0.02f;
-                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
                         noiseSprite.setTexture(noiseTexture);
                         break;
 
                     case sf::Keyboard::Scan::Down:
                         amp -= 0.02f;
-                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
                         noiseSprite.setTexture(noiseTexture);
                         break;
 
                     case sf::Keyboard::Scan::Right:
                         freq += 0.02f;
-                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
                         noiseSprite.setTexture(noiseTexture);
                         break;
                     
                     case sf::Keyboard::Scan::Left:
                         freq -= 0.02f;
-                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
                         noiseSprite.setTexture(noiseTexture);
                         break;
+                    case sf::Keyboard::Scan::Equal:
+                        oct += 1;
+                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
+                        noiseSprite.setTexture(noiseTexture);
+                        break;
+                    case sf::Keyboard::Scan::Hyphen:
+                        oct -= 1;
+                        if (oct == 0) { oct = 1; break; }
+                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp, oct);
+                        noiseSprite.setTexture(noiseTexture);
+                        break;                                            
                 }
                 break;
             }
