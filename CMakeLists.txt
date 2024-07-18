@@ -9,7 +9,6 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:
 
 add_executable(App WIN32 main.cpp)
 
-set(SFML_DIR "c:\\SFML\\lib\\cmake\\SFML")
 set(SFML_STATIC_LIBRARIES TRUE)
 
 target_link_libraries(App sfml-graphics)
