@@ -1,14 +1,22 @@
 #include <cmath>
+#include <ctime>
+#include <cstdlib>
 #include <SFML/Graphics.hpp>
 
-sf::Vector2f randomGradient(int ix, int iy)
+const unsigned long long g_seed = std::time(nullptr);
+
+sf::Vector2f randomGradient(int ix, int iy, unsigned long long seed)
 {
     const unsigned w = 8 * sizeof(unsigned);
-    const unsigned s = w / 2; 
+    const unsigned s = w / 2;
     unsigned a = ix, b = iy;
+
+    const unsigned d = seed >> w, t = seed; 
+    a += d + t;
     a *= 3284157443;
  
     b ^= a << s | a >> w - s;
+    b += d + t;
     b *= 1911520717;
  
     a ^= b << s | b >> w - s;
@@ -24,7 +32,7 @@ sf::Vector2f randomGradient(int ix, int iy)
 
 float dotGridGradient(int ix, int iy, float x, float y)
 {
-    sf::Vector2f gradient = randomGradient(ix, iy);
+    sf::Vector2f gradient = randomGradient(ix, iy, g_seed);
 
     float dx = x - ix;
     float dy = y - iy;
