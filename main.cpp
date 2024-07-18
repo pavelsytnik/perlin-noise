@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <SFML/Graphics.hpp>
 
-const unsigned long long g_seed = std::time(nullptr);
+unsigned long long g_seed = std::time(nullptr);
 
 sf::Vector2f randomGradient(int ix, int iy, unsigned long long seed)
 {
@@ -68,20 +68,17 @@ float perlin(float x, float y)
     return value;
 }
 
-int main()
+sf::Texture getNoise(int width, int height)
 {
-    sf::RenderWindow window(sf::VideoMode(1000, 1000, 32), "Noise");
-
-    sf::Vector2u winSize = window.getSize();
-    sf::Uint8* pixels = new sf::Uint8[winSize.x * winSize.y * 4];
+    sf::Uint8* pixels = new sf::Uint8[width * height * 4];
 
     const int GRID_SIZE = 400;
 
-    for (int x = 0; x < winSize.x; ++x)
+    for (int x = 0; x < width; ++x)
     {
-        for (int y = 0; y < winSize.y; ++y)
+        for (int y = 0; y < height; ++y)
         {
-            int index = (y * winSize.x + x) * 4;
+            int index = (y * width + x) * 4;
 
             float val = 0;
             float amp = 1;
@@ -107,10 +104,58 @@ int main()
     }
 
     sf::Texture noiseTexture;
+
+    noiseTexture.create(width, height);
+    noiseTexture.update(pixels);
+
+    delete[] pixels;
+
+    return noiseTexture;
+}
+
+int main()
+{
+    sf::RenderWindow window(sf::VideoMode(1000, 1000, 32), "Noise");
+
+    sf::Vector2u winSize = window.getSize();
+    // sf::Uint8* pixels = new sf::Uint8[winSize.x * winSize.y * 4];
+
+    // const int GRID_SIZE = 400;
+
+    // for (int x = 0; x < winSize.x; ++x)
+    // {
+    //     for (int y = 0; y < winSize.y; ++y)
+    //     {
+    //         int index = (y * winSize.x + x) * 4;
+
+    //         float val = 0;
+    //         float amp = 1;
+    //         float freq = 1;
+
+    //         for (int i = 0; i < 12; ++i)
+    //         {
+    //             val += perlin(x * freq / GRID_SIZE, y * freq / GRID_SIZE) * amp;
+
+    //             freq *= 2;
+    //             amp /= 2;
+    //         }
+    //         val *= 1.2f;
+
+    //         if (val > 1.f) val = 1.f;
+    //         else if (val < -1.f) val = -1.f;
+
+    //         int color = (int) (((val + 1.f) * .5f) * 255.f);
+
+    //         pixels[index + 2] = pixels[index + 1] = pixels[index] = color;
+    //         pixels[index + 3] = 255;
+    //     }
+    // }
+
+    sf::Texture noiseTexture = getNoise(winSize.x, winSize.y);
     sf::Sprite noiseSprite;
 
-    noiseTexture.create(winSize.x, winSize.y);
-    noiseTexture.update(pixels);
+    //noiseTexture.create(winSize.x, winSize.y);
+    //noiseTexture.update(pixels);
 
     noiseSprite.setTexture(noiseTexture);
 
@@ -124,6 +169,13 @@ int main()
             case sf::Event::Closed:
                 window.close();
                 break;
+            case sf::Event::KeyPressed:
+                if (event.key.scancode == sf::Keyboard::R)
+                {
+                    g_seed = std::time(nullptr);
+                    noiseTexture = getNoise(winSize.x, winSize.y);
+                    noiseSprite.setTexture(noiseTexture);
+                }
             }
         }
         window.clear();
