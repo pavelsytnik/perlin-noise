@@ -1,6 +1,6 @@
 #include <cmath>
 #include <ctime>
-#include <cstdlib>
+
 #include <SFML/Graphics.hpp>
 
 unsigned long long g_seed = std::time(nullptr);
@@ -11,17 +11,17 @@ sf::Vector2f randomGradient(int ix, int iy, unsigned long long seed)
     const unsigned s = w / 2;
     unsigned a = ix, b = iy;
 
-    const unsigned d = seed >> w, t = seed; 
+    const unsigned d = seed >> w, t = (unsigned) seed; 
     a += d + t;
     a *= 3284157443;
  
-    b ^= a << s | a >> w - s;
+    b ^= (a << s) | (a >> (w - s));
     b += d + t;
     b *= 1911520717;
  
-    a ^= b << s | b >> w - s;
+    a ^= (b << s) | (b >> (w - s));
     a *= 2048419325;
-    float random = a * (3.14159265 / ~(~0u >> 1)); // in [0, 2*Pi]
+    float random = a * (3.14159265f / ~(~0u >> 1)); // in [0, 2*Pi]
     
     sf::Vector2f v;
     v.x = std::sin(random);
@@ -47,10 +47,10 @@ float interpolate(float a0, float a1, float w)
 
 float perlin(float x, float y)
 {
-    int x0 = std::floor(x);
-    int y0 = std::floor(y);
-    int x1 = std::ceil(x);
-    int y1 = std::ceil(y);
+    int x0 = (int) std::floor(x);
+    int y0 = (int) std::floor(y);
+    int x1 = (int) std::ceil(x);
+    int y1 = (int) std::ceil(y);
 
     float sx = x - x0;
     float sy = y - y0;
@@ -116,51 +116,15 @@ sf::Texture getNoise(int width, int height, float frequency, float amplitude)
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(1000, 1000, 32), "Noise");
-
     sf::Vector2u winSize = window.getSize();
-    // sf::Uint8* pixels = new sf::Uint8[winSize.x * winSize.y * 4];
-
-    // const int GRID_SIZE = 400;
-
-    // for (int x = 0; x < winSize.x; ++x)
-    // {
-    //     for (int y = 0; y < winSize.y; ++y)
-    //     {
-    //         int index = (y * winSize.x + x) * 4;
-
-    //         float val = 0;
-    //         float amp = 1;
-    //         float freq = 1;
-
-    //         for (int i = 0; i < 12; ++i)
-    //         {
-    //             val += perlin(x * freq / GRID_SIZE, y * freq / GRID_SIZE) * amp;
-
-    //             freq *= 2;
-    //             amp /= 2;
-    //         }
-    //         val *= 1.2f;
-
-    //         if (val > 1.f) val = 1.f;
-    //         else if (val < -1.f) val = -1.f;
-
-    //         int color = (int) (((val + 1.f) * .5f) * 255.f);
-
-    //         pixels[index + 2] = pixels[index + 1] = pixels[index] = color;
-    //         pixels[index + 3] = 255;
-    //     }
-    // }
-
-    sf::Texture noiseTexture = getNoise(winSize.x, winSize.y, 1, 1);
-    sf::Sprite noiseSprite;
-
-    //noiseTexture.create(winSize.x, winSize.y);
-    //noiseTexture.update(pixels);
-
-    noiseSprite.setTexture(noiseTexture);
 
     float freq = 1.f;
     float amp = 1.f;
+
+    sf::Texture noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+    sf::Sprite noiseSprite;
+
+    noiseSprite.setTexture(noiseTexture);
 
     while (window.isOpen())
     {
@@ -172,39 +136,44 @@ int main()
             case sf::Event::Closed:
                 window.close();
                 break;
+
             case sf::Event::KeyPressed:
-                if (event.key.scancode == sf::Keyboard::R)
+                switch (event.key.scancode)
                 {
-                    g_seed = std::time(nullptr);
-                    noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
-                    noiseSprite.setTexture(noiseTexture);
+                    case sf::Keyboard::Scan::R:
+                        g_seed = std::time(nullptr);
+                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                        noiseSprite.setTexture(noiseTexture);
+                        break;
+
+                    case sf::Keyboard::Scan::Up:
+                        amp += 0.02f;
+                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                        noiseSprite.setTexture(noiseTexture);
+                        break;
+
+                    case sf::Keyboard::Scan::Down:
+                        amp -= 0.02f;
+                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                        noiseSprite.setTexture(noiseTexture);
+                        break;
+
+                    case sf::Keyboard::Scan::Right:
+                        freq += 0.02f;
+                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                        noiseSprite.setTexture(noiseTexture);
+                        break;
+                    
+                    case sf::Keyboard::Scan::Left:
+                        freq -= 0.02f;
+                        noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
+                        noiseSprite.setTexture(noiseTexture);
+                        break;
                 }
-                else if (event.key.scancode == sf::Keyboard::Scan::Up)
-                {
-                    amp += 0.02f;
-                    noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
-                    noiseSprite.setTexture(noiseTexture);
-                }
-                else if (event.key.scancode == sf::Keyboard::Scan::Down)
-                {
-                    amp -= 0.02f;
-                    noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
-                    noiseSprite.setTexture(noiseTexture);
-                }
-                else if (event.key.scancode == sf::Keyboard::Scan::Right)
-                {
-                    freq += 0.02f;
-                    noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
-                    noiseSprite.setTexture(noiseTexture);
-                }
-                else if (event.key.scancode == sf::Keyboard::Scan::Left)
-                {
-                    freq -= 0.02f;
-                    noiseTexture = getNoise(winSize.x, winSize.y, freq, amp);
-                    noiseSprite.setTexture(noiseTexture);
-                }
+                break;
             }
         }
+
         window.clear();
         window.draw(noiseSprite);
         window.display();
